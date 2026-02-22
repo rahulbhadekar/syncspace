@@ -69,7 +69,8 @@ Open test.html in your browser or use Live Server.
 
 📸 Screenshots
 
-<img width="1920" height="1080" alt="Screenshot 2026-02-22 225808" src="https://github.com/user-attachments/assets/18ed1d31-72f4-450b-97f1-0f6346f06eac" />
+![Chat UI] (https://github.como/user-attachments/assets/<img width="1920" height="1080" alt="Screenshot 2026-02-22 225808" src="https://github.com/user-attachments/assets/43b14114-5d85-4b9e-8b03-3c56b843a0dc" />
+
 
 
 
