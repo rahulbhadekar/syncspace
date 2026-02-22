@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SyncSpace Chat</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: radial-gradient(circle at top, #0f2027, #203a43, #2c5364);
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.chat-container{
+  width:380px;
+  height:600px;
+  display:flex;
+  flex-direction:column;
+  backdrop-filter: blur(15px);
+  background: rgba(255,255,255,0.08);
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,0.2);
+  overflow:hidden;
+}
+
+.chat-header{
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+  color:white;
+  background: linear-gradient(45deg,#4facfe,#00f2fe);
+}
+
+.users-list{
+  max-height:120px;
+  overflow:auto;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  padding:10px;
+  color:white;
+  font-size:14px;
+}
+
+.user-item{
+  padding:6px;
+  cursor:pointer;
+  border-radius:8px;
+}
+
+.user-item:hover{
+  background: rgba(255,255,255,0.1);
+}
+
+.active-user{
+  background:#00c6ff;
+}
+
+.chat-messages{
+  flex:1;
+  padding:15px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.chat-input{
+  display:flex;
+  padding:10px;
+  gap:10px;
+  background: rgba(0,0,0,0.2);
+}
+
+.chat-input input{
+  flex:1;
+  padding:10px;
+  border-radius:20px;
+  border:none;
+  outline:none;
+  background: rgba(255,255,255,0.1);
+  color:white;
+}
+
+.chat-input button{
+  padding:10px 15px;
+  border:none;
+  border-radius:20px;
+  background:#00c6ff;
+  color:white;
+  cursor:pointer;
+}
+
+.message{
+  max-width:70%;
+  padding:12px 15px;
+  border-radius:15px;
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.1);
+  animation: slideUp 0.3s ease;
+}
+
+.sent{
+  margin-left:auto;
+  background: rgba(0,200,255,0.25);
+}
+
+.received{
+  margin-right:auto;
+}
+
+@keyframes slideUp{
+  from{ transform:translateY(30px); opacity:0;}
+  to{ transform:translateY(0); opacity:1;}
+}
+
+.back-btn{
+  font-size:12px;
+  cursor:pointer;
+  opacity:0.8;
+}
+
+.back-btn:hover{
+  opacity:1;
+}
+</style>
+</head>
+
+<body>
+
+<div class="chat-container">
+
+<div class="chat-header" id="chatTitle">💬 Global Chat</div>
+
+<div class="users-list" id="users"></div>
+
+<div class="chat-messages" id="messages"></div>
+
+<div class="chat-input">
+<input id="msg" placeholder="Type message..." />
+<button onclick="sendMessage()">Send</button>
+</div>
+
+</div>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<script>
+const username = prompt("Enter your name") || "Anonymous";
+const socket = io("http://localhost:5000");
+
+socket.emit("join", username);
+
+const messagesDiv = document.getElementById("messages");
+const usersDiv = document.getElementById("users");
+const input = document.getElementById("msg");
+const chatTitle = document.getElementById("chatTitle");
+
+let selectedUser = null;
+let selectedUserName = null;
+
+socket.on("usersList", (users) => {
+
+  usersDiv.innerHTML = "<b>Online Users</b><br>";
+
+  Object.entries(users).forEach(([id, name]) => {
+
+    if(name === username) return;
+
+    const div = document.createElement("div");
+    div.className = "user-item";
+    div.textContent = name;
+
+    div.onclick = () => {
+      selectedUser = id;
+      selectedUserName = name;
+      messagesDiv.innerHTML = "";
+      chatTitle.innerHTML = `💬 Chat with ${name} <span class="back-btn" onclick="backToGlobal()"> (Back)</span>`;
+    };
+
+    usersDiv.appendChild(div);
+  });
+
+});
+
+function backToGlobal(){
+  selectedUser = null;
+  selectedUserName = null;
+  chatTitle.innerHTML = "💬 Global Chat";
+  messagesDiv.innerHTML = "";
+}
+
+function sendMessage(){
+  const message = input.value.trim();
+  if(!message) return;
+
+  if(selectedUser){
+    socket.emit("privateMessage", {
+      to: selectedUser,
+      text: message,
+      sender: username
+    });
+  } else {
+    socket.emit("sendMessage", {
+      text: message,
+      sender: username
+    });
+  }
+
+  input.value = "";
+}
+
+socket.on("receiveMessage", addMessage);
+socket.on("receivePrivateMessage", addMessage);
+
+function addMessage(data){
+
+  const msgDiv = document.createElement("div");
+  msgDiv.classList.add("message");
+
+  if(data.sender === username){
+    msgDiv.classList.add("sent");
+    msgDiv.innerText = data.text;
+  } else {
+    msgDiv.classList.add("received");
+    msgDiv.innerText = data.sender + ": " + data.text;
+  }
+
+  messagesDiv.appendChild(msgDiv);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+</script>
+
+</body>
+</html>
