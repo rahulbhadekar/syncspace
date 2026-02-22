@@ -69,7 +69,8 @@ Open test.html in your browser or use Live Server.
 
 📸 Screenshots
 
-<img width="1920" height="1080" alt="Screenshot 2026-02-22 225808" src="https://github.com/user-attachments/assets/f5abe72a-cc72-46f9-a3ad-e696c32fe479" />
+<img width="1920" height="1080" alt="Screenshot 2026-02-22 225808" src="https://github.com/user-attachments/assets/18ed1d31-72f4-450b-97f1-0f6346f06eac" />
+
 
 
 🎯 Learning Outcomes
